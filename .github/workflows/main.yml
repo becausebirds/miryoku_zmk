@@ -44,7 +44,7 @@ on:
       modules:
         type: string
         default: '["default"]'
-  
+
 
 jobs:
   main:
@@ -80,7 +80,6 @@ jobs:
           test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && set -x
           
           echo "::group::variables"
-
           if [ -n "${{ matrix.shield }}" -a "${{ matrix.shield }}" != "default" ]
           then
             SHIELD_ARG="-DSHIELD=\"${{ matrix.shield }}\""
@@ -93,31 +92,25 @@ jobs:
           echo "shield_arg=$SHIELD_ARG" >> $GITHUB_OUTPUT
           keyboard_split="$keyboard"
           keyboard_base=`echo "$keyboard" | sed -e 's/_\(left\|right\|dongle\)//' -e 's/@.*//'`
-
           configfile="${GITHUB_WORKSPACE}/miryoku_zmk/miryoku/custom_config.h"
-
           tmpfile="$configfile.tmp"
           echo -n '#define ' > "$tmpfile"
           echo -n "MIRYOKU_KEYBOARD_$keyboard_base" | tr  -c '[:alnum:]' '_' | tr '[:lower:]' '[:upper:]' >> "$tmpfile"
           echo >> "$tmpfile"
           cat "$configfile" >> "$tmpfile"
           mv "$tmpfile" "$configfile"
-
           run_name="miryoku_zmk"
           if [ -n "${{ matrix.shield }}" -a "${{ matrix.shield }}" != 'default' ]
           then
             run_name="$run_name ${{ matrix.shield }}"
           fi
           run_name="$run_name ${{ matrix.board }}"
-
           hash_length=8
-
           if [ -n "${{ matrix.custom_config }}" -a "${{ matrix.custom_config }}" != 'default' ]
           then
             echo "${{ matrix.custom_config }}" >> "$configfile"
             run_name="$run_name config_"`echo "${{ matrix.custom_config }}" | md5sum | head -c "$hash_length"`
           fi
-
           for option in "alphas_${{ matrix.alphas }}" "extra_${{ matrix.extra }}" "tap_${{ matrix.tap }}" "nav_${{ matrix.nav }}" "clipboard_${{ matrix.clipboard }}" "layers_${{ matrix.layers }}" "mapping_${{ matrix.mapping }}"
           do
             case "$option" in
@@ -129,11 +122,9 @@ jobs:
                 ;;
             esac
           done
-
           artifact_dir="${GITHUB_WORKSPACE}/artifacts"
           echo "artifact_dir=$artifact_dir" >> $GITHUB_OUTPUT
           mkdir "$artifact_dir"
-
           test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && cp "$configfile" "$artifact_dir"
           
           if [ -n "${{ matrix.kconfig }}" -a "${{ matrix.kconfig }}" != 'default' ]
@@ -143,7 +134,6 @@ jobs:
             test "$MIRYOKU_DEBUG" = 'MIRYOKU_DEBUG_TRUE' && cp "$kconfig_file" "$artifact_dir"
             run_name="$run_name kconfig_"`echo "${{ matrix.kconfig }}" | md5sum | head -c "$hash_length"`
           fi
-
           if [ -n "${{ matrix.branches }}" -a "${{ matrix.branches }}" != 'default' ]
           then
             run_name="$run_name branches_"`echo "${{ matrix.branches }}" | md5sum | head -c "$hash_length"`
@@ -154,12 +144,9 @@ jobs:
             run_name="$run_name modules_"`echo "${{ matrix.modules }}" | md5sum | head -c "$hash_length"`
             modules="${{ matrix.modules }}"
           fi
-
           run_name=`echo $run_name | tr ' ' '-'`
           echo "run_name=$run_name" >> $GITHUB_OUTPUT
-
           echo "::endgroup::"
-
           echo "::group::matrix"
           matrix_file="$artifact_dir/matrix.txt"
           echo "
@@ -179,7 +166,6 @@ jobs:
           " > "$matrix_file"
           cat "$matrix_file"
           echo "::endgroup::"
-
           echo "::group::outboards"
           if [ -n "$shield" ]
           then
@@ -233,7 +219,6 @@ jobs:
             fi
           done
           echo "::endgroup::"
-
           echo "::group::zmk"
           zmk=`echo "$branches" | cut -d ' ' -f 1`
           if [ -z "$zmk" ]
@@ -245,7 +230,6 @@ jobs:
           branch=`echo "$zmk" | cut -f 3- -d '/'`
           git clone -b "$branch" --depth 1 "https://github.com/$user/$repo.git" 'zmk'
           echo "::endgroup::"
-
           echo "::group::merge"
           merges=`echo "$branches" | cut -d ' ' -f 2- -s`
           if [ -n "$merges" ]
@@ -268,7 +252,6 @@ jobs:
             done
           fi
           echo "::endgroup::"
-
           echo "::group::modules"
           for module in $modules 
           do
@@ -311,14 +294,12 @@ jobs:
             #west_debug='-v'
             #west_build_debug='-t rom_report -t ram_report'
           fi
-
           echo "::group::setup"
           cd "${GITHUB_WORKSPACE}/zmk"
           west $west_debug init -l app
           west $west_debug update
           west $west_debug zephyr-export
           echo "::endgroup::"
-
           echo "::group::build"
           log='build.log'
           build_failed_message='::error::Build failed with exit code'
@@ -326,7 +307,7 @@ jobs:
           EX_DATAERR='65'
           cd "${GITHUB_WORKSPACE}/zmk/app"
           {
-            west $west_debug build -b ${{ matrix.board }} $west_build_debug -- ${{ steps.main.outputs.shield_arg }} ${{ steps.main.outputs.modules_arg }} -DZMK_CONFIG="${GITHUB_WORKSPACE}/miryoku_zmk/config" ||
+            west $west_debug build -b ${{ matrix.board }} $west_build_debug -S studio-rpc-usb-uart -- ${{ steps.main.outputs.shield_arg }} ${{ steps.main.outputs.modules_arg }} -DZMK_CONFIG="${GITHUB_WORKSPACE}/miryoku_zmk/config" ||
             echo "$build_failed_message $?." ;
           } 2>&1 | tee "$log"
           if grep -q 'Invalid BOARD; see above.' "$log"
@@ -354,7 +335,6 @@ jobs:
             false
           fi
           echo "::endgroup::"
-
           echo "::group::copy"
           for extension in 'uf2' 'bin' 'hex' 'elf'
           do
@@ -372,4 +352,3 @@ jobs:
         with:
           name: ${{ steps.main.outputs.run_name }}
           path: ${{ steps.main.outputs.artifact_dir }}
-
