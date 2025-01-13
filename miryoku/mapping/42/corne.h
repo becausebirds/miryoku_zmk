@@ -4,6 +4,7 @@
 #if !defined (MIRYOKU_LAYOUTMAPPING_CORNE)
 
 #define XXX &none
+#include <interfaces/hid-trackball.dtsi>
 
 #define MIRYOKU_LAYOUTMAPPING_CORNE( \
      K00, K01, K02, K03, K04,      K05, K06, K07, K08, K09, \
@@ -33,3 +34,8 @@ XXX  K20  K21  K22  K23  K24       K25  K26  K27  K28  K29  XXX \
 #endif
 
 #define MIRYOKU_MAPPING MIRYOKU_LAYOUTMAPPING_CORNE
+
+&hid_trackball_interface {
+    automouse-layer = <5>;
+    automouse-layer-timeout-ms = <600>;
+};
