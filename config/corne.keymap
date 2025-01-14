@@ -4,9 +4,3 @@
 #include "../miryoku/custom_config.h"
 #include "../miryoku/mapping/42/corne.h"
 #include "../miryoku/miryoku.dtsi"
-#include <interfaces/hid-trackball.dtsi>
-
-&hid_trackball_interface {
-    automouse-layer = <5>;
-    automouse-layer-timeout-ms = <600>;
-};
