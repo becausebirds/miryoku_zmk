@@ -16,6 +16,15 @@
 #include "miryoku.h"
 
 #include <dt-bindings/zmk/mouse.h>
+
+// Include hid-trackball interface and configure it
+#include <interfaces/hid-trackball.dtsi>
+
+&hid_trackball_interface {
+    automouse-layer = <5>;  // Specify the layer where the auto mouse feature is enabled
+    automouse-layer-timeout-ms = <600>;  // Timeout for switching to auto mouse layer
+};
+
 / {
   keymap {
     compatible = "zmk,keymap";
