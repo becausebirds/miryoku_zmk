@@ -58,3 +58,8 @@ MIRYOKU_LAYER_LIST
 #else
   #include "miryoku_behaviors.dtsi"
 #endif
+
+&hid_trackball_interface {
+    automouse-layer = <5>;
+    automouse-layer-timeout-ms = <600>;
+};
